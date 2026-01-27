@@ -1,53 +1,25 @@
-from collections import deque
-from parking_request import RequestState
+# CORRECTED IMPORT: Added 'core_logic.' prefix
+from core_logic.parking_request import RequestState
 
 class RollbackManager:
     def __init__(self):
-        """
-        Manages the history of operations to support rollback.
-        Ref: [cite: 62-70]
-        """
-        # Using deque as a Stack (LIFO)
-        self.operation_stack = deque() 
+        self.history_stack = []
 
     def log_allocation(self, request, slot):
-        """
-        Records a successful allocation so it can be rolled back later.
-        Ref: 
-        """
-        # Store a tuple or small object containing the references needed to undo
-        operation_record = {
-            'type': 'ALLOCATION',
-            'request': request,
-            'slot': slot
-        }
-        self.operation_stack.append(operation_record)
-        print(f"[RollbackLog] Recorded allocation for Vehicle {request.vehicle_id}")
+        # Push the operation to the stack
+        # Store tuple: (type, request_obj, slot_obj)
+        self.history_stack.append(('ALLOCATE', request, slot))
 
-    def rollback_last_k_operations(self, k: int):
-        """
-        Undoes the last k allocation operations.
-        Ref: [cite: 67-70]
-        """
-        count = 0
-        while count < k and self.operation_stack:
-            last_op = self.operation_stack.pop() # Pop from stack
-            
-            if last_op['type'] == 'ALLOCATION':
-                request = last_op['request']
-                slot = last_op['slot']
+    def undo(self):
+        if not self.history_stack:
+            return False
 
-                # 1. Restore Slot Availability [cite: 65, 69]
-                print(f"[Rollback] Undoing allocation for Vehicle {request.vehicle_id} in Slot {slot.slot_id}")
-                slot.free()
+        action_type, request, slot = self.history_stack.pop()
 
-                # 2. Restore Request State [cite: 66, 70]
-                # We revert it back to 'REQUESTED' or 'CANCELLED' depending on interpretation.
-                # Usually, 'Rollback' implies undoing the success, so we set it back to CANCELLED 
-                # or just reset it. For this project, let's treat it as cancelling the allocation.
-                request.state = RequestState.CANCELLED 
-                request.assigned_slot_id = None
-            
-            count += 1
+        if action_type == 'ALLOCATE':
+            # Reverse the allocation
+            slot.free_slot()
+            request.update_state(RequestState.CANCELLED)
+            return True
         
-        return count  # Returns how many operations were actually rolled back
+        return False 
