@@ -3,269 +3,230 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Parking Command Center</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <title>UMT Smart Parking</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --text-main: #e2e8f0;
-            --text-muted: #94a3b8;
-            --accent-blue: #3b82f6;
-            --accent-green: #10b981;
-            --accent-red: #ef4444;
-            --accent-orange: #f59e0b;
+            --bg-color: #050505;
+            --line-color: #333;
+            --node-free: #1a1a1a;
+            --node-occupied: #2a0a0a;
+            --accent-green: #00ff41;
+            --accent-red: #ff3333;
+            --accent-blue: #0088ff;
+            --text-color: #cccccc;
         }
 
         body {
-            font-family: 'Inter', sans-serif;
             background-color: var(--bg-color);
-            color: var(--text-main);
+            color: var(--text-color);
+            font-family: 'Roboto Mono', monospace;
             margin: 0;
             padding: 20px;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        /* HEADER */
-        header {
+            height: 100vh;
+            box-sizing: border-box;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            border-bottom: 1px solid #334155;
-            padding-bottom: 20px;
+            gap: 40px;
+            overflow: hidden;
         }
-        h1 { margin: 0; font-weight: 600; letter-spacing: -1px; }
-        .subtitle { color: var(--text-muted); font-size: 14px; }
 
-        /* STATS GRID */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
+        /* --- LEFT COLUMN: CONTROL NODE --- */
+        .control-panel {
+            width: 350px;
+            display: flex;
+            flex-direction: column;
+            border-right: 2px solid var(--line-color);
+            padding-right: 30px;
         }
-        .stat-card {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 12px;
-            border: 1px solid #334155;
-            text-align: center;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-        .stat-card h3 {
-            margin: 0;
-            font-size: 12px;
+
+        .system-header {
+            font-size: 22px;
+            font-weight: bold;
+            color: var(--accent-blue);
+            margin-bottom: 10px;
             text-transform: uppercase;
             letter-spacing: 1px;
-            color: var(--text-muted);
+            border-bottom: 2px solid var(--line-color);
+            padding-bottom: 15px;
         }
-        .stat-card p {
-            font-size: 28px;
-            font-weight: 700;
-            margin: 10px 0 0 0;
-            color: var(--text-main);
-        }
-        .stat-card.highlight p { color: var(--accent-blue); }
 
-        /* CONTROLS AREA */
-        .controls {
-            background: linear-gradient(145deg, #1e293b, #0f172a);
-            padding: 25px;
-            border-radius: 16px;
-            border: 1px solid #334155;
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            margin-bottom: 40px;
-            flex-wrap: wrap;
+        .sub-header {
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 30px;
         }
+
+        .input-group { margin-bottom: 25px; }
+        
+        label {
+            display: block;
+            font-size: 10px;
+            color: #666;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
         input, select {
-            background: #334155;
-            border: 1px solid #475569;
+            width: 100%;
+            background: #111;
+            border: 1px solid #444;
             color: white;
-            padding: 12px 15px;
-            border-radius: 8px;
+            padding: 12px;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 14px;
             outline: none;
-            font-size: 14px;
         }
-        input::placeholder { color: #94a3b8; }
-        
-        button {
-            padding: 12px 24px;
-            cursor: pointer;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            transition: all 0.2s;
-            font-size: 14px;
-        }
-        .btn-park {
+        input:focus, select:focus { border-color: var(--accent-blue); }
+
+        .btn-action {
+            width: 100%;
+            padding: 15px;
             background: var(--accent-blue);
-            color: white;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            border: none;
+            color: black;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            margin-top: 10px;
         }
-        .btn-park:hover { background: #2563eb; transform: translateY(-1px); }
-        
+        .btn-action:hover { opacity: 0.9; }
+
         .btn-undo {
+            width: 100%;
+            padding: 10px;
             background: transparent;
-            border: 1px solid var(--accent-orange);
-            color: var(--accent-orange);
-            margin-left: auto;
+            border: 1px solid var(--line-color);
+            color: #666;
+            margin-top: 20px;
+            cursor: pointer;
         }
-        .btn-undo:hover { background: var(--accent-orange); color: white; }
+        .btn-undo:hover { border-color: var(--accent-red); color: var(--accent-red); }
 
-        /* ZONES LAYOUT */
-        .zones-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 25px;
-            margin-bottom: 40px;
-        }
-        .zone-box {
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: 20px;
-            border: 1px solid #334155;
-        }
-        .zone-header {
+        /* --- RIGHT COLUMN: THE NETWORK GRID --- */
+        .grid-container {
+            flex: 1;
             display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-            align-items: center;
-        }
-        .zone-title { font-size: 18px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
-        .zone-badge { 
-            background: #334155; 
-            padding: 4px 8px; 
-            border-radius: 6px; 
-            font-size: 12px; 
-            color: var(--accent-blue); 
+            flex-direction: column;
+            overflow-y: auto;
         }
 
-        /* PARKING SLOTS */
-        .slot-grid {
+        .stats-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 40px;
+            border-bottom: 1px solid var(--line-color);
+            padding-bottom: 20px;
+        }
+        .stat-box {
+            border: 1px solid var(--line-color);
+            padding: 10px 20px;
+            min-width: 120px;
+        }
+        .stat-label { font-size: 10px; color: #666; }
+        .stat-val { font-size: 18px; font-weight: bold; color: white; }
+
+        /* --- TREE/GRAPH VISUALS --- */
+        .zone-branch {
+            margin-bottom: 50px;
+            position: relative;
+            padding-left: 20px;
+            border-left: 2px solid var(--line-color);
+        }
+
+        .zone-title {
+            background: var(--bg-color);
+            padding: 5px 10px;
+            border: 1px solid var(--line-color);
+            display: inline-block;
+            margin-bottom: 20px;
+            color: var(--accent-blue);
+            font-weight: bold;
+            position: relative;
+            left: -32px;
+            text-transform: uppercase;
+        }
+
+        .node-cluster {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
             gap: 15px;
         }
-        .slot {
-            height: 120px;
-            border-radius: 8px;
+
+        .node {
+            height: 80px;
+            background: var(--node-free);
+            border: 1px solid var(--line-color);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             position: relative;
-            transition: 0.3s;
-            border-left: 2px dashed rgba(255,255,255,0.1);
-            border-right: 2px dashed rgba(255,255,255,0.1);
-            background: rgba(255,255,255,0.02);
+            transition: all 0.2s;
         }
-        
-        /* FREE SLOT */
-        .slot.free {
-            border-bottom: 4px solid var(--accent-green);
-        }
-        .slot.free h4 { color: var(--accent-green); }
-        
-        /* OCCUPIED SLOT */
-        .slot.occupied {
-            background: rgba(239, 68, 68, 0.1);
-            border-bottom: 4px solid var(--accent-red);
-        }
-        .slot.occupied strong { color: var(--accent-red); }
 
-        .slot-id {
+        /* Connector Line */
+        .node::before {
+            content: '';
             position: absolute;
-            top: 5px;
-            left: 5px;
-            font-size: 10px;
-            color: #64748b;
-            font-family: monospace;
+            left: -16px;
+            top: 50%;
+            width: 15px;
+            height: 1px;
+            background: var(--line-color);
+            display: none; 
         }
-        
-        .car-icon { font-size: 24px; margin-bottom: 5px; }
 
-        /* DEPART BUTTON */
-        .btn-depart {
+        .node.occupied {
+            background: var(--node-occupied);
+            border-color: var(--accent-red);
+            box-shadow: inset 0 0 10px rgba(255, 0, 0, 0.2);
+        }
+
+        .node.pulse {
+            border-color: var(--accent-green);
+            background: rgba(0, 255, 65, 0.1);
+            animation: flash 1.5s infinite alternate;
+        }
+
+        .node-id { font-size: 10px; color: #555; position: absolute; top: 5px; left: 5px; }
+        .vehicle-id { font-size: 12px; font-weight: bold; color: white; }
+        
+        .btn-release {
+            margin-top: 5px;
             background: var(--accent-red);
-            color: white;
-            padding: 4px 10px;
-            font-size: 11px;
-            border-radius: 20px;
-            margin-top: 8px;
-            opacity: 0.8;
+            border: none;
+            color: black;
+            font-size: 9px;
+            padding: 2px 5px;
+            cursor: pointer;
         }
-        .btn-depart:hover { opacity: 1; transform: scale(1.05); }
 
-        /* HISTORY TABLE */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: var(--card-bg);
-            border-radius: 12px;
-            overflow: hidden;
-            font-size: 14px;
+        @keyframes flash {
+            from { box-shadow: 0 0 5px var(--accent-green); border-color: var(--accent-green); }
+            to { box-shadow: 0 0 20px var(--accent-green); border-color: white; }
         }
-        th { background: #0f172a; padding: 15px; text-align: left; color: var(--text-muted); font-weight: 500; }
-        td { padding: 15px; border-bottom: 1px solid #334155; }
-        tr:last-child td { border-bottom: none; }
-        
-        .tag { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
-        .tag.ALLOCATED { background: rgba(59, 130, 246, 0.2); color: var(--accent-blue); }
-        .tag.RELEASED { background: rgba(16, 185, 129, 0.2); color: var(--accent-green); }
-        .tag.CANCELLED { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); }
-
     </style>
 </head>
 <body>
 
-<div class="container">
-    
-    <header>
-        <div>
-            <h1>?? Smart Parking City</h1>
-            <span class="subtitle">Real-time Allocation & Monitoring System</span>
+    <div class="control-panel">
+        <div class="system-header">
+            UMT SMART PARKING SYSTEM
         </div>
-        <div>
-            <span style="background:var(--accent-green); color:#000; padding:5px 10px; border-radius:4px; font-weight:bold; font-size:12px;">SYSTEM ONLINE</span>
+        <div class="sub-header">
+            /// CENTRAL COMMAND NODE
         </div>
-    </header>
 
-    <div class="stats-grid">
-        <div class="stat-card highlight">
-            <h3>Avg Duration</h3>
-            <p>{{ avg_duration|floatformat:3 }} <span style="font-size:14px; color:#64748b;">min</span></p>
-        </div>
-        <div class="stat-card">
-            <h3>Peak Zone</h3>
-            <p style="font-size:20px;">{{ peak_zone }}</p>
-        </div>
-        <div class="stat-card">
-            <h3>Completed</h3>
-            <p style="color:var(--accent-green);">{{ completed_count }}</p>
-        </div>
-        <div class="stat-card">
-            <h3>Cancelled</h3>
-            <p style="color:var(--accent-orange);">{{ cancelled_count }}</p>
-        </div>
-    </div>
-
-    <div class="controls">
-        <form action="{% url 'process_allocation' %}" method="POST" style="display:flex; gap:10px; align-items:center;">
+        <form action="{% url 'process_allocation' %}" method="POST">
             {% csrf_token %}
-            <div style="display:flex; flex-direction:column;">
-                <label style="font-size:11px; color:#94a3b8; margin-bottom:4px;">VEHICLE ID</label>
-                <input type="text" name="vehicle_id" placeholder="e.g. CAR-88" required autocomplete="off">
-            </div>
             
-            <div style="display:flex; flex-direction:column;">
-                <label style="font-size:11px; color:#94a3b8; margin-bottom:4px;">TARGET ZONE</label>
+            <div class="input-group">
+                <label>INPUT_VEHICLE_ID</label>
+                <input type="text" name="vehicle_id" placeholder="XYZ-000" required autocomplete="off">
+            </div>
+
+            <div class="input-group">
+                <label>TARGET_ZONE</label>
                 <select name="zone_id">
                     {% for zone in zones %}
                     <option value="{{ zone.zone_id }}">{{ zone.name }}</option>
@@ -273,43 +234,57 @@
                 </select>
             </div>
 
-            <button type="submit" class="btn-park">??? Park Vehicle</button>
+            <button type="submit" class="btn-action">INITIALIZE ALLOCATION</button>
         </form>
 
-        <form action="{% url 'process_undo' %}" method="POST" style="margin-left:auto;">
+        <form action="{% url 'process_undo' %}" method="POST">
             {% csrf_token %}
-            <button type="submit" class="btn-undo">? Undo Last Action</button>
+            <button type="submit" class="btn-undo">CMD: UNDO</button>
         </form>
     </div>
 
-    <div class="zones-container">
+    <div class="grid-container">
+        
+        <div class="stats-row">
+            <div class="stat-box">
+                <div class="stat-label">AVG_TIME</div>
+                <div class="stat-val">{{ avg_duration|floatformat:1 }}m</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">COMPLETED</div>
+                <div class="stat-val">{{ completed_count }}</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">ACTIVE_NODES</div>
+                <div class="stat-val" style="color:var(--accent-blue)">ONLINE</div>
+            </div>
+        </div>
+
         {% for zone in zones %}
-        <div class="zone-box">
-            <div class="zone-header">
-                <div class="zone-title">
-                    <span>?? {{ zone.name }}</span>
-                </div>
-                <div class="zone-badge">{{ zone.calculate_utilization|floatformat:0 }}% Load</div>
+        <div class="zone-branch">
+            <div class="zone-title">
+                {{ zone.name }} 
             </div>
             
-            <div class="slot-grid">
+            <div class="node-cluster">
                 {% for area in zone.parking_areas %}
                     {% for slot in area.slots %}
                     
-                    <div class="slot {% if slot.is_available %}free{% else %}occupied{% endif %}">
-                        <span class="slot-id">{{ slot.slot_id }}</span>
-                        
+                    <div class="node 
+                        {% if slot.vehicle_id %}occupied{% endif %}
+                        {% if slot.vehicle_id == just_parked_id %}pulse{% endif %}
+                    ">
+                        <span class="node-id">{{ slot.slot_id }}</span>
+
                         {% if slot.vehicle_id %}
-                            <div class="car-icon">??</div>
-                            <strong style="font-size:14px;">{{ slot.vehicle_id }}</strong>
-                            
-                            <form action="{% url 'process_release' %}" method="POST">
+                            <span class="vehicle-id">{{ slot.vehicle_id }}</span>
+                            <form action="{% url 'process_release' %}" method="POST" style="margin:0;">
                                 {% csrf_token %}
                                 <input type="hidden" name="vehicle_id" value="{{ slot.vehicle_id }}">
-                                <button type="submit" class="btn-depart">EXIT</button>
+                                <button type="submit" class="btn-release">EXIT</button>
                             </form>
                         {% else %}
-                            <div style="color:#334155; font-size:12px;">AVAILABLE</div>
+                            <span style="font-size:10px; color:#333;">EMPTY</span>
                         {% endif %}
                     </div>
 
@@ -318,42 +293,8 @@
             </div>
         </div>
         {% endfor %}
-    </div>
 
-    <h3 style="color:var(--text-muted); margin-top:40px;">RECENT ACTIVITY LOG</h3>
-    <table>
-        <thead>
-            <tr>
-                <th>Time</th>
-                <th>Vehicle</th>
-                <th>Zone</th>
-                <th>Status</th>
-                <th>Duration</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for req in history reversed %}
-            <tr>
-                <td>{{ req.request_time|date:"H:i:s" }}</td>
-                <td style="font-weight:bold;">{{ req.vehicle_id }}</td>
-                <td>Zone {{ req.requested_zone_id }}</td>
-                <td><span class="tag {{ req.state.name }}">{{ req.state.name }}</span></td>
-                <td>
-                    {% if req.state.name == "RELEASED" %}
-                        {{ req.get_duration_minutes|floatformat:2 }} min
-                    {% else %}
-                        ...
-                    {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-    <div style="text-align:center; margin-top:50px; color:#334155; font-size:12px;">
-        &copy; 2024 Smart Parking System | DSA Final Project
     </div>
-</div>
 
 </body>
 </html>
