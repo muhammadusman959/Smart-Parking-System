@@ -1,4 +1,4 @@
-
+# CORRECTED IMPORT
 from core_logic.parking_request import RequestState
 
 class AllocationEngine:
@@ -12,10 +12,10 @@ class AllocationEngine:
             request.update_state(RequestState.CANCELLED)
             return False, None
 
-        
+        # 1. Try Preferred Zone
         slot = self.find_slot_in_zone(preferred_zone)
         
-        
+        # 2. If full, try neighbors (simple loop through other zones)
         if not slot:
             for zid, zone in self.zones.items():
                 if zid != request.preferred_zone_id:
@@ -25,7 +25,7 @@ class AllocationEngine:
         if slot:
             slot.occupy_slot(request.vehicle_id)
             request.allocate(slot.slot_id)
-            request.complete() 
+            request.complete() # Mark as COMPLETED immediately for this demo
             return True, slot
         else:
             request.update_state(RequestState.CANCELLED)
